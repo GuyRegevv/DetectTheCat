@@ -2,8 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --ok: #16a34a;   /* green-600 */
-  --warn: #f59e0b; /* amber-500 */
-  --err: #dc2626;  /* red-600 */
+/* Neutral, cohesive palette — restrained accents */
+:root{
+  --bg: #fafafa;           /* page background */
+  --surface: #ffffff;      /* cards, panels */
+  --text: #0f172a;         /* zinc-900-ish */
+  --muted: #6b7280;        /* zinc-500-ish */
+  --border: #e5e7eb;       /* zinc-200-ish */
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+
+  /* functional colors, used sparingly */
+  --ok: #0ea5a0;       /* teal-600-ish for success accents */
+  --warn: #a3a3a3;     /* muted for “neutral” statuses */
+  --bad: #dc2626;      /* red-600 for error/non-cat overlay text bg */
 }
+
+/* Typography + smoothing */
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+}
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+/* Reusable helpers */
+.card {
+  @apply rounded-2xl bg-white shadow-sm;
+  box-shadow: var(--shadow);
+}
+.surface { background: var(--surface); }
+.border-subtle { border-color: var(--border); }
+.text-muted { color: var(--muted); }
