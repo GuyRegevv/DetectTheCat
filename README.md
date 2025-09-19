@@ -1,5 +1,5 @@
-<p align="center">
-  <img src="./public/shifi.jpeg" width="200" alt="Shifi" />
+<p align="left">
+  <img src="./public/shifi.jpeg" width="300" alt="Shifi" />
 </p>
 
 # Cat-Only Photobooth
