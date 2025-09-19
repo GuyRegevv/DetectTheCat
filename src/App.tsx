@@ -74,9 +74,11 @@ export default function App() {
         <div className="min-h-screen bg-zinc-50 text-zinc-900">
           <Header />
     
-          {/* status bar */}
-          <div className="mx-auto max-w-6xl p-4 flex items-center justify-end">
-            <StatusPill status={camStatus as any} />
+            {/* status bar */}
+          <div className="mx-auto max-w-7xl px-5 pt-4">
+              <div className="flex items-center justify-end">
+                  <StatusPill status={camStatus as any} />
+              </div>
           </div>
     
           <main className="mx-auto grid max-w-7xl gap-6 p-4 lg:grid-cols-3">

@@ -3,10 +3,21 @@ export interface BadgeProps {
 }
 
 export default function Badge({ running }: BadgeProps) {
-  const text = running ? "Camera On" : "Cat Required";
-  const cls = running ? "bg-green-600 text-white" : "bg-amber-500/95 text-black";
+  const text = running ? "Camera On - Cat Required" : "Camera Off";
+  const cls = running
+    ? "bg-[var(--ok)] text-white"
+    : "bg-[var(--warn)] text-zinc-800";
+
   return (
-    <div className={`absolute left-3 top-3 rounded-full px-3 py-1 text-sm font-semibold ${cls}`}>
+    <div
+      className={[
+        "absolute left-4 top-4",
+        "inline-flex items-center justify-center whitespace-nowrap",
+        "rounded-md border border-subtle/70 shadow-sm",
+        "px-4 py-1.5 text-sm font-medium",
+        cls,
+      ].join(" ")}
+    >
       {text}
     </div>
   );
