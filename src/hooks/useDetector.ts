@@ -11,6 +11,12 @@ export function useDetector() {
   const [error, setError] = useState<string | null>(null);
   const [backend, setBackend] = useState<"webgl" | "cpu">("webgl");
 
+  // realtime loop internals
+  const rafIdRef = useRef<number | null>(null);
+  const [fps, setFps] = useState<number>(0);
+  const lastTsRef = useRef<number>(0);
+  const emaRef = useRef<number | null>(null);
+
   const load = useCallback(async () => {
     if (status === "ready" && modelRef.current) return;
     setStatus("loading");
@@ -38,5 +44,59 @@ export function useDetector() {
     return preds as CocoPrediction[];
   }, []);
 
-  return { status, error, backend, setBackend, load, detectOnce };
+    // Start a simple rAF loop: call onResult(preds) each frame (or every other frame if you want)
+    const startLive = useCallback((
+      videoEl: HTMLVideoElement,
+      onResult: (preds: CocoPrediction[]) => void,
+      maxResults = 10,
+      throttleEveryNFrames = 1
+    ) => {
+      if (!modelRef.current) throw new Error("Model not loaded");
+      if (rafIdRef.current) return; // already running
+  
+      let frame = 0;
+  
+      const tick = async (ts: number) => {
+        // FPS calc (EMA)
+        if (lastTsRef.current) {
+          const dt = ts - lastTsRef.current;
+          const inst = 1000 / dt;
+          emaRef.current = emaRef.current == null ? inst : 0.9 * emaRef.current + 0.1 * inst;
+          setFps(Number(emaRef.current.toFixed(1)));
+        }
+        lastTsRef.current = ts;
+  
+        try {
+          if (frame % throttleEveryNFrames === 0) {
+            const preds = await modelRef.current!.detect(videoEl, maxResults);
+            onResult(preds as CocoPrediction[]);
+          }
+          frame++;
+        } catch (e) {
+          console.error("live detect error:", e);
+        }
+        rafIdRef.current = requestAnimationFrame(tick);
+      };
+  
+      rafIdRef.current = requestAnimationFrame(tick);
+    }, []);
+
+      /** Stop the real-time loop and reset FPS. */
+    const stopLive = useCallback(() => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+      setFps(0);
+      lastTsRef.current = 0;
+      emaRef.current = null;
+    }, []);
+
+
+  return { 
+    // model + one-shot
+    status, error, backend, setBackend, load, detectOnce,
+    // live loop
+    startLive, stopLive, fps,
+  };
 }

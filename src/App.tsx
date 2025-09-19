@@ -8,21 +8,67 @@ import Footer from "./components/Footer";
 import { useRef, useState } from "react";
 import { useCamera } from "./hooks/useCamera";
 import { useDetector } from "./hooks/useDetector";
+import { drawCatsOnOverlay } from "./utils/draw";
+import { hasCat, summarizePreds } from "./utils/predictions";
+import { captureShot } from "./utils/capture";
 import type { CocoPrediction } from "./hooks/useDetector";
+
 
 export default function App() {
     // camera
     const { videoRef, status: camStatus, error: camError, start, stop } = useCamera();
     const running = camStatus === "running";
     // model
-    const { status: mdlStatus, error: mdlError, backend, setBackend, load, detectOnce } = useDetector();
-    //overlay (detections)
+    const { status: mdlStatus, error: mdlError, backend, setBackend, load, detectOnce, startLive, stopLive, fps } = useDetector();
+
     const overlayRef = useRef<HTMLCanvasElement | null>(null)
-    const [lastResult, setLastResult] = useState<{
-        cat: boolean;
-        count: number;
-      } | null>(null);
+    const [threshold, setThreshold] = useState(0.55);
+    const [live, setLive] = useState(false);
     const [shots, setShots] = useState<{ id: string; url: string }[]>([]);
+    const [catDetected, setCatDetected] = useState(false);
+    const [lastResult, setLastResult] = useState<{cat: boolean; count: number;} | null>(null);
+
+    const handleToggleLive = async () => {
+        if (mdlStatus !== "ready" || !videoRef.current) return;
+        
+        if (!live) {
+            // starting live
+            startLive(videoRef.current,
+            (preds) => {
+                const has = hasCat(preds, threshold)
+                setCatDetected(has);
+                if (overlayRef.current) drawCatsOnOverlay(overlayRef.current, preds, threshold);
+            }, 10, 2);
+            setLive(true);
+        } else {
+            // stopping live
+            stopLive();
+            setLive(false);
+            setCatDetected(false);
+            // clear overlay
+            if (overlayRef.current) {
+            const ctx = overlayRef.current.getContext("2d");
+            ctx?.clearRect(0, 0, overlayRef.current.width, overlayRef.current.height);
+            }
+        }
+    };
+
+    const handleDetectOnce = async () => {
+        if (!videoRef.current) return;
+        const preds: CocoPrediction[] = await detectOnce(videoRef.current);
+        console.log("predictions", summarizePreds(preds))
+        const cat = hasCat(preds, threshold)
+        setLastResult({ cat, count: preds.length });
+        // draw overlay for cats only
+        if (overlayRef.current) drawCatsOnOverlay(overlayRef.current, preds, threshold);
+    }
+
+    const handleCapture = () => {
+        if (!videoRef.current) return;
+        const url = captureShot(videoRef.current, overlayRef.current);
+        if (!url) return;
+        setShots(prev => [{ id: String(Date.now()), url }, ...prev]);
+      }
 
     return (
         <div className="min-h-screen bg-zinc-50 text-zinc-900">
@@ -42,11 +88,8 @@ export default function App() {
                 running={running}
                 onStart={start}
                 onStop={stop}
-                onCapture={() => {
-                    // later: implement capture → add to shots[]
-                    alert("Capture pressed (stub)");
-                }}
-                canCapture={false} // disabled until we hook detection
+                onCapture={handleCapture}
+                canCapture={catDetected} // disabled until we hook detection
                 autoCapture={false}
                 onToggleAutoCapture={() => {}}
                 >
@@ -68,17 +111,13 @@ export default function App() {
                 modelStatus={mdlStatus}
                 modelError={mdlError}
                 onLoad={load}
-                onDetectOnce={async () => {
-                  if (!videoRef.current) return;
-                  const preds: CocoPrediction[] = await detectOnce(videoRef.current);
-                  const cat = preds.some(
-                    (p) => p.class === "cat" && p.score >= 0.55
-                  );
-                  setLastResult({ cat, count: preds.length });
-                  console.log("predictions", preds);
-                  console.log(preds.map(p => `${p.class} (${(p.score * 100).toFixed(1)}%)`));
-                }}
                 lastSummary={lastResult}
+                threshold={threshold}                
+                onThreshold={(v) => setThreshold(v)} 
+                live={live}                          
+                onToggleLive={handleToggleLive}      
+                fps={fps}                            
+                onDetectOnce={handleDetectOnce}
               />
     
               <Gallery items={shots} onClear={() => setShots([])} />
