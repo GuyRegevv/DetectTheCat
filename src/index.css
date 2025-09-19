@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ok: #16a34a;   /* green-600 */
+  --warn: #f59e0b; /* amber-500 */
+  --err: #dc2626;  /* red-600 */
+}
