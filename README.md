@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="./public/shifi.jpeg" width="600" alt="Shifi" />
+  <img src="./public/shifi.jpeg" width="200" alt="Shifi" />
 </p>
 
 # Cat-Only Photobooth
 
 > A sleek, minimalist web photobooth that only lets you capture photos when a **cat is in frame**.  
-> Real-time computer vision, premium UI styling — built for fun and for portfolio practice.
+> Real-time computer vision
 
 ---
 
@@ -13,9 +13,8 @@
 - Real-time **cat detection** powered by TensorFlow.js (COCO-SSD).
 - Green overlay for cats, red overlay for everything else.
 - **Capture button** enabled only when a cat is present.
-- Captured photos displayed in a refined **square gallery**.
+- Captured photos displayed in a gallery.
 - Download or clear shots with one click.
-- Premium, minimalist design (neutral palette, subtle icons).
 
 ---
 
