@@ -1,5 +1,5 @@
-<p align="left">
-  <img src="./public/shifi.jpeg" width="300" alt="Shifi" />
+<p align="center">
+  <img src="./docs/hero-cat.png" width="700" style="border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.08);" alt="Shifi" />
 </p>
 
 # Cat-Only Photobooth
