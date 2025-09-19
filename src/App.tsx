@@ -8,7 +8,7 @@ import Footer from "./components/Footer";
 import { useRef, useState } from "react";
 import { useCamera } from "./hooks/useCamera";
 import { useDetector } from "./hooks/useDetector";
-import { drawCatsOnOverlay } from "./utils/draw";
+import { drawDetectionsOverlay } from "./utils/draw";
 import { hasCat, summarizePreds } from "./utils/predictions";
 import { captureShot } from "./utils/capture";
 import type { CocoPrediction } from "./hooks/useDetector";
@@ -37,7 +37,7 @@ export default function App() {
             (preds) => {
                 const has = hasCat(preds, threshold)
                 setCatDetected(has);
-                if (overlayRef.current) drawCatsOnOverlay(overlayRef.current, preds, threshold);
+                if (overlayRef.current) drawDetectionsOverlay(overlayRef.current, preds, threshold);
             }, 10, 2);
             setLive(true);
         } else {
@@ -60,7 +60,7 @@ export default function App() {
         const cat = hasCat(preds, threshold)
         setLastResult({ cat, count: preds.length });
         // draw overlay for cats only
-        if (overlayRef.current) drawCatsOnOverlay(overlayRef.current, preds, threshold);
+        if (overlayRef.current) drawDetectionsOverlay(overlayRef.current, preds, threshold);
     }
 
     const handleCapture = () => {
